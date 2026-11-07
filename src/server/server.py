@@ -60,3 +60,4 @@ class Server():
         """
         self.word = word 
         self.letter_counts = utils.getFrequencies(word)
+    
