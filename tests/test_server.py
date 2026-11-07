@@ -1,4 +1,4 @@
-from src.server.main import Server
+from src.server.server import Server
 import pytest 
 
 
