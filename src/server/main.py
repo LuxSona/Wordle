@@ -30,9 +30,39 @@ def main():
             #We are now ready to recieve
             data = c.recv(1024)
             data = data.decode()
-            
-            c.close()
-            logger.info("[INFO] CLOSING CONNECTION")
-            break 
+            response = handleData(wordle_server, data)
+            if response == "QUIT":
+                c.send("Goodybe!".encode())
+                c.close()
+                logger.info("[INFO] CLOSING CONNECTION")
+            if response == "ERROR":
+                c.send("Error!".encode())
+                c.close()
+                logger.info("[INFO] CLOSING CONNECTION")
+            break
+
+
+def handleData(wordle_server: server.Server, data : str) -> str:
+    """
+    Handles data sent in by client.
+
+    :param wordle_server: The server that we're accessing
+    :type wordle_server: server.Server
+    :param data: The data that we're handling.
+    :type data: str
+    :return: the response that this server should provide.
+    :rtype str:
+    """
+    commands = data.split(',')
+    match commands[0]:
+        case 'G':
+            if len(commands) < 2:
+                return "ERROR"
+        case 'Q':
+            #Quit
+            return "QUIT"
+        
+
+
 
 
