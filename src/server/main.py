@@ -11,37 +11,46 @@ class Server():
         self.letter_counts = utils.getFrequencies(self.word)
     
     
-    def guess(self, guessed: str) -> list[chr]:
-        """Returns the value of a guess
+    def guess(self, guessed: str) -> tuple[list[chr], chr]:
+        """Given a guess, returns either how close that guess is and an exit code. 
+        Codes look like this:
+            'I' - Unsuccesful guess
+            'S' - Successful guess
+            '1' - Error code for bad length word
+            '2' - Error code for non alphabetical guess
 
         :param guessed: The word guessed
         :type guessed: str
-        :return: A list of characters, [c,c,c,c,c], where c is either T, when a letter is placed right, E, where a letter is placed wrong but present, and N, where the letter is not present. May return ['1'] for ne 5 or ['2'] for numbers
-        :rtype: list[chr]
+        :return: The guess result and the code.
+        :rtype: tuple[list[chr], chr]
         """
         #Make sure guessed is lower
         guessed = guessed.lower()
         guessed_list = list(guessed)
         if len(guessed) != 5:
             #Must be a five letter word.
-            return ['1']
+            return ['N','N','N','N','N'], '1'
         
         if any(not(x.isalpha()) for x in guessed_list):
             #Guess must be alphabetic.
-            return ['2']
+            return ['N','N','N','N','N'], '2'
         
         result = []
         counts = self.letter_counts.copy()
+        success = True
         for (a, b) in zip(guessed_list, list(self.word)):
             if a == b and counts.get(a,0) != 0:
                 result.append('T')
                 counts[a] = counts[a] - 1
             elif counts.get(a,0) != 0:
                 result.append('E')
+                success = False 
                 counts[a] = counts[a] - 1 
             else:
+                success = False
                 result.append('N')
-        return result 
+        code = 'S' if success else 'I'
+        return result, code
     
     def setWord(self, word : str):
         """Sets to new word
