@@ -11,11 +11,11 @@ class Server():
         self.letter_counts = utils.getFrequencies(self.word)
     
     
-    def guess(self, guessed: str) -> tuple[list[chr], chr]:
+    def guess(self, guessed: str) -> tuple[list[chr], str]:
         """Given a guess, returns either how close that guess is and an exit code. 
         Codes look like this:
-            'I' - Unsuccessful guess
-            'S' - Successful guess
+            'INCOMPLETE' - Unsuccessful guess
+            'SUCCESS' - Successful guess
             '1' - Error code for bad length word
             '2' - Error code for non alphabetical guess
 
@@ -29,7 +29,7 @@ class Server():
         success = (guessed == self.word)
         if success:
             #Don't even bother
-            return ['G']*5, 'S'
+            return ['G']*5, 'SUCCESS'
     
         guessed_list = list(guessed)
         if len(guessed) != 5:
@@ -67,7 +67,7 @@ class Server():
                 counts[letter_guessed] -= 1
         
         #Results should be through
-        return result, 'I'
+        return result, 'INCOMPLETE'
                 
 
     
