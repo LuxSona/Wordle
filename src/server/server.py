@@ -14,7 +14,7 @@ class Server():
     def guess(self, guessed: str) -> tuple[list[chr], chr]:
         """Given a guess, returns either how close that guess is and an exit code. 
         Codes look like this:
-            'I' - Unsuccesful guess
+            'I' - Unsuccessful guess
             'S' - Successful guess
             '1' - Error code for bad length word
             '2' - Error code for non alphabetical guess
@@ -26,31 +26,50 @@ class Server():
         """
         #Make sure guessed is lower
         guessed = guessed.lower()
+        success = (guessed == self.word)
+        if success:
+            #Don't even bother
+            return ['G']*5, 'S'
+    
         guessed_list = list(guessed)
         if len(guessed) != 5:
             #Must be a five letter word.
-            return ['N','N','N','N','N'], '1'
+            return ['R']*5, '1'
         
         if any(not(x.isalpha()) for x in guessed_list):
             #Guess must be alphabetic.
-            return ['N','N','N','N','N'], '2'
+            return ['R']*5, '2'
         
-        result = []
+        result = ['R']*5
         counts = self.letter_counts.copy()
-        success = True
-        for (a, b) in zip(guessed_list, list(self.word)):
-            if a == b and counts.get(a,0) != 0:
-                result.append('T')
-                counts[a] = counts[a] - 1
-            elif counts.get(a,0) != 0:
-                result.append('E')
-                success = False 
-                counts[a] = counts[a] - 1 
+
+        #Collect all letters that correspond one-to-one with the secret word.
+        #First pass
+        for i, (a, b) in enumerate(zip(guessed_list, list(self.word))):
+            if a == b:
+                result[i] = 'G'
+                #We know that a exists in frequency
+                counts[a] -= 1 
+            elif counts.get(a, 0) != 0:
+                #If we've already placed a T and that pushed it to 0, we don't even have to worry about it. Else, assume yellow
+                result[i] = 'Y'
+        
+        #Second pass, turn yellows to grays
+        for i, (letter_guessed,result_color) in enumerate(zip(guessed_list, result)):
+            if result_color != 'Y':
+                #Don't even bother
+                continue 
+            #Color should be 'Y' now
+            if counts.get(letter_guessed,0) == 0:
+                #TODO // Is this safe? We're mutating a list in the middle of a for-loop. It *should* be okay, but maybe let's double check.
+                result[i] = 'R'
             else:
-                success = False
-                result.append('N')
-        code = 'S' if success else 'I'
-        return result, code
+                counts[letter_guessed] -= 1
+        
+        #Results should be through
+        return result, 'I'
+                
+
     
     def setWord(self, word : str):
         """Sets to new word

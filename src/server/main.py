@@ -27,6 +27,10 @@ def main():
             c, addr = s.accept()
             logger.info(f"[INFO] GOT CONNECTION FROM {addr}")
             c.send("ALIVE".encode())
+            #We are now ready to recieve
+            data = c.recv(1024)
+            data = data.decode()
+            
             c.close()
             logger.info("[INFO] CLOSING CONNECTION")
             break 

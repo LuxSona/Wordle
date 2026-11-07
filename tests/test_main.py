@@ -23,11 +23,12 @@ def run_server_in_separate_process():
         proc.kill()
 
 
-@pytest.mark.timeout(5)
+@pytest.mark.timeout(60)
 def test_server(run_server_in_separate_process):
     port = 12255
-    time.sleep(10)
-    # with socket.socket() as s:
-    #     s.connect(('127.0.0.1', port))
-    #     data = s.recv(1024)
-    #     assert data.decode() == "ALIVE"
+    time.sleep(1)
+    with socket.socket() as s:
+        s.connect(('127.0.0.1', port))
+        data = s.recv(1024)
+        assert data.decode() == "ALIVE"
+
