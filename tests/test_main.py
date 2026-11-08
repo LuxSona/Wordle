@@ -3,12 +3,12 @@ import socket
 import multiprocessing
 import time 
 import src.server.main as main 
-
+import src.server.utils as utils
 #Test socket connection
 def run_server():
     main.main()
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="module")
 def run_server_in_separate_process():
     proc = multiprocessing.Process(target=run_server,daemon=True)
     proc.start()
@@ -27,8 +27,74 @@ def run_server_in_separate_process():
 def test_server(run_server_in_separate_process):
     port = 12255
     time.sleep(1)
-    with socket.socket() as s:
+    with socket.socket() as s, s.makefile('r',encoding='utf-8',newline='\n') as f:
         s.connect(('127.0.0.1', port))
-        data = s.recv(1024)
-        assert data.decode() == "ALIVE"
+        
+        data = utils.recv_message(f)
+        assert data == "READY"
 
+        s.sendall("G,H1LLO\n".encode())
+        resp = utils.recv_message(f)
+        assert resp == "ERROR"
+        print("First test")
+
+        #Check length
+        s.sendall("G,HELLOO\n".encode())
+        resp = utils.recv_message(f)
+        assert resp == "ERROR"
+        print("Second test")
+
+        #Check empty
+        s.sendall("G\n".encode())
+        resp = utils.recv_message(f)
+        assert resp == "ERROR"
+        print("Third test")
+
+        #Check out_of_guesses
+        for _ in range(6):
+            s.sendall("G,ZYZZX\n".encode())
+            #Wait
+            utils.recv_message(f)
+            time.sleep(0.5)
+        s.sendall("G,ZZYZX\n".encode())
+        resp =utils.recv_message(f)
+        assert resp == "ERROR"
+        print("Fourth test")
+        #Check reset
+        s.sendall("R\n".encode())
+        resp =utils.recv_message(f)
+        assert resp == "RESET"
+        print("Fifth test")
+        #Check set empty
+        s.sendall("S\n".encode())
+        resp =utils.recv_message(f)
+        assert resp == "ERROR"
+        print("Sixth test")
+        #Check set with bad values
+        s.sendall("S,HELLOO\n".encode())
+        resp =utils.recv_message(f)
+        assert resp == "ERROR"
+        print("Seventh test")
+        s.sendall("S,H1LLO\n".encode())
+        resp =utils.recv_message(f)
+        assert resp == "ERROR"
+        print("Eight test")
+        #Check set works with good values
+        s.sendall("S,HELLO\n".encode())
+        resp =utils.recv_message(f)
+        assert resp == "SET;hello"
+        print("Ninth test")
+        #Check guess works with good but inaccurate values
+        s.sendall("G,HILLO\n".encode())
+        resp =utils.recv_message(f)
+        assert resp == "GUESS_AGAIN;G,R,G,G,G"
+        print("Tenth test")
+        #Check guess works with good and accurate values
+        s.sendall("G,HELLO\n".encode())
+        resp =utils.recv_message(f)
+        assert resp == "SUCCESS"
+        print("Eleventh test")
+        #Check quit works
+        s.sendall("Q\n".encode())
+        resp =utils.recv_message(f)
+        assert resp == "QUIT"

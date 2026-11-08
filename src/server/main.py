@@ -18,33 +18,52 @@ def main():
     #Default port is 12255
     port = 12255 
     with socket.socket() as s:
+        #Set timeout to something else for testing.
+        s.settimeout(120)
         logger.info("[INFO] SOCKET CREATED")        
         s.bind(('127.0.0.1', port))
         #Listen
         s.listen(5)
         logger.info(f"[INFO] LISTENING ON PORT {port}")
-        while True:
-            c, addr = s.accept()
-            logger.info(f"[INFO] GOT CONNECTION FROM {addr}")
-            c.send("ALIVE".encode())
-            #We are now ready to recieve
-            data = c.recv(1024)
-            data = data.decode()
-            response = handleData(wordle_server, data)
-            if response == "QUIT":
-                c.send("Goodybe!".encode())
-                c.close()
-                logger.info("[INFO] CLOSING CONNECTION")
-            if response == "ERROR":
-                c.send("Error!".encode())
-                c.close()
-                logger.info("[INFO] CLOSING CONNECTION")
-            break
+        try:
+            while True:
+                c, addr = s.accept()
+                logger.info(f"[INFO] GOT CONNECTION FROM {addr}")
+                with c, c.makefile("r", encoding='utf-8', newline='\n') as f:
+                    c.settimeout(60)
+                    c.sendall("READY\n".encode())
+                    try:
+                        while True:
+                            #We are now ready to recieve
+                            data = utils.recv_message(f)
+                            if not data:
+                                logger.info("[INFO] CLIENT DISCONNECTED")
+                                break 
+                                
+                            response = handleData(wordle_server, data)
+                            c.sendall(response.encode())
+                            if response == "QUIT\n":
+                                logger.info(f"[INFO] {addr} HAS QUIT.")
+                                wordle_server.reset()
+                                break
+                    except (TimeoutError, ConnectionError):
+                        logger.info(f"[INFO] CLIENT {addr} TIMED OUT / DISCONNECTED")
+        except TimeoutError:
+            logger.info("[INFO] TIMEOUT")
+            
+        
+                
 
 
 def handleData(wordle_server: server.Server, data : str) -> str:
     """
     Handles data sent in by client.
+
+    Example data:
+
+    "G,HELLO"
+    "Q"
+    "R"
 
     :param wordle_server: The server that we're accessing
     :type wordle_server: server.Server
@@ -57,12 +76,29 @@ def handleData(wordle_server: server.Server, data : str) -> str:
     match commands[0]:
         case 'G':
             if len(commands) < 2:
-                return "ERROR"
+                return "ERROR\n"
+            resp, code = wordle_server.guess(commands[1])
+            if code == '1' or code == '2' or code == '3':
+                return "ERROR\n"
+            if code == 'SUCCESS':
+                return f"{code}\n" 
+            else:
+                return f"GUESS_AGAIN;{",".join(resp)}\n"
+        case 'R':
+            wordle_server.reset()
+            return "RESET\n"
         case 'Q':
             #Quit
-            return "QUIT"
-        
-
+            return "QUIT\n"
+        case 'S':
+            if len(commands) < 2:
+                return "ERROR\n"
+            w,c = wordle_server.setWord(commands[1])
+            if c == '1' or c == '2':
+                return "ERROR\n"
+            return f"SET;{w}\n" 
+        case _:
+            return "ERROR\n"
 
 
 
