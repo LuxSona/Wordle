@@ -83,7 +83,7 @@ def handleData(wordle_server: server.Server, data : str) -> str:
             if code == 'SUCCESS':
                 return f"{code}\n" 
             else:
-                return f"GUESS_AGAIN;{",".join(resp)}\n"
+                return f"GUESS_AGAIN;{','.join(resp)}\n"
         case 'R':
             wordle_server.reset()
             return "RESET\n"
