@@ -1,36 +1,47 @@
 import tkinter as tk 
+from .WordleClient import WordleClient
 
 class UserInterface():
-    def __init__(self):
+    """The user interface class
+    """     
+    def __init__(self, client : WordleClient):
+        """The initialization function for the wordle interface class.
+
+        :param client: A reference to the client connection handler
+        :type client: WordleClient
+        """        
         #Root pane
+        self.client = client
         self.root = tk.Tk()
         self.word_frame = tk.Frame(self.root, width=150, height=300)
         self.root.geometry("600x400")
         self.button_panel = tk.Frame(self.root, width=600,height=100)
         #Rows
         self.ROW_COUNT = 6
-        self.word_rows = []
+        self.word_rows = [[(None, None)]*5]*6
         self.current_row = 0
+        self.current_col = 0
 
-        self.initalizeRows()
-        for row in self.word_rows:
-            row.pack(fill="both", expand=True)
+        self._initalizeRows()
         self.word_frame.pack(fill="y",expand=True)
         self.button_panel.pack()
         self.root.mainloop()
+        self._add_event_binding()
     
-    def initalizeRows(self):
-        for row_idx in range(self.ROW_COUNT):
-            row = tk.Frame(self.word_frame)
-            
+    def _initalizeRows(self):
+        """Initializes the word grid rows for the interface.
+        """
+        for row in range(6):
             for col in range(5):
-                row.grid_columnconfigure(col, weight=1)
+                tile = tk.Canvas(self.word_frame,background="lightgray",width=50,height=50)
+                tile.grid(row=row, column=col, padx=5, pady=7, sticky='')
+                text_id = tile.create_text(25,25,text='')
+                self.word_rows[row][col] = (text_id,tile)
 
-            row.grid_rowconfigure(0,weight=1)
-            for col in range(5):
-                label = tk.Label(row, text=f"{row_idx},{col}")
-                label.grid(row=0, column=col, sticky="nsew", padx=5, pady=5)
-            self.word_rows.append(row)
+    
+    def _add_event_binding(self):
+        def _onKeyEntered(self):
+            ...
 
-
-a = UserInterface()
+client = WordleClient()
+a = UserInterface(client)
