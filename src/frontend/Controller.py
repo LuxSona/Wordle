@@ -14,16 +14,19 @@ class Controller():
         self.outbox = queue.Queue()
         self.io_thread = threading.Thread(target=self._worker_thread, daemon=True)
         self.io_thread.start()
+        self.root.protocol("WM_DELETE_WINDOW", self._on_quit)
         self.poll_queue()
     
 
     def _on_quit(self):
-        self.outbox.put("Q")
+        self.client.send("Q\n")
+        self.root.destroy()
 
     def quit(self):
         self.root.quit()
 
     def handle_message(self, message : str):
+        print(f"MESSAGE {message}")
         #We have a million kinds of messages that we can recieve, but let's start with the most basic
         if message is None:
             self.root.quit()
@@ -40,9 +43,14 @@ class Controller():
             case "ERROR":
                 error_type = message_parts[1]
                 error_code = message_parts[2]
+
                 self.ui.show_error(error_type, error_code)
             case "RESET":
                 self.ui.reset()
+                #Get the secret word again
+                resp = self.client.send("T")
+                self.word = resp.split(';')[1]
+
             #These branches shouldn't be used at all
             case "SET":
                 pass
@@ -73,6 +81,7 @@ class Controller():
                 pass 
 
     def _enqueueGuess(self, word : str):
+        print(f"GUESSING {word}")
         """Handles the guess on the part of the wordle client
 
         :param word: The word to send

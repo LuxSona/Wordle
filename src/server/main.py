@@ -13,10 +13,9 @@ def main():
     Uses socket communication
     """
 
-
     #Create a server for our Wordle logic.
     wordle_server = server.Server()
-    
+    print(wordle_server.word)
     #Default port is 12255
     port = 12255 
     with socket.socket() as s:
@@ -47,6 +46,7 @@ def main():
                             if response == "QUIT\n":
                                 logger.info(f"[INFO] {addr} HAS QUIT.")
                                 wordle_server.reset()
+                                c.close()
                                 break
                     except (TimeoutError, ConnectionError):
                         logger.info(f"[INFO] CLIENT {addr} TIMED OUT / DISCONNECTED")
@@ -58,6 +58,7 @@ def main():
 
 
 def handleData(wordle_server: server.Server, data : str) -> str:
+    print(f"DATA {data}")
     """
     Handles data sent in by client.
 
@@ -107,3 +108,5 @@ def handleData(wordle_server: server.Server, data : str) -> str:
 
 
 
+if __name__ == "__main__":
+    main()

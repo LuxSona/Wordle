@@ -7,9 +7,7 @@ class WordleClient():
         self.message_queue = queue.Queue()
         self.PORT = 12255
         self.log = []
-    
-    def quit(self):
-        ...
+
     
     def send(self, message : str) -> str | None:
         with socket.socket() as s, s.makefile('r',encoding='utf-8',newline='\n') as f:
@@ -22,6 +20,4 @@ class WordleClient():
                 resp = utils.recv_message(f)
                 return resp
     
-    def reset(self):
-        ...
 

@@ -19,7 +19,6 @@ class UserInterface():
         self.on_quit = on_quit
 
         self.word = word 
-        self.client = client
         self.root = root
         self.word_frame = tk.Frame(self.root, width=150, height=300)
         self.root.geometry("600x400")
@@ -39,6 +38,7 @@ class UserInterface():
     def show_win(self):
         response = messagebox.askyesno("Win!",f"You won in {self.current_row+1} guesses! Would you like to play again?")
         if response:
+            self.reset()
             self.on_reset()
         else:
             self.on_quit()
@@ -111,14 +111,19 @@ class UserInterface():
             for id, tile in row:
                 tile.itemconfig(id, text="")
                 tile.configure(bg="lightgray")
+        self.current_row_word = []
     
     
     def show_error(self, error_type : str, error_code : str):
-        resp = messagebox.askyesno("ERROR",f"You made an error during {error_type}, code {error_code}. Do you wish to reset? No will quit.")
+        error_messages = {
+            "1": "Your guessed word is shorter than the allowed FIVE letters",
+            "2": "Your guessed word has invalid characters.",
+            "3": "You've run out of guesses",
+            "COMMAND": "Somehow, an internal error has occurred. Check the logs",
+            "UNK": "An unknown error has occurred. Check the logs."}
+        resp = messagebox.askyesno("ERROR",f"You made an error during {error_type}: {error_messages[error_code]}. Do you wish to reset? No will quit.")
         if resp:
             self.on_reset()
         else:
             self.on_quit()
 
-client = WordleClient()
-a = UserInterface(lambda e: None, lambda e: None, lambda e: None, tk.Tk(), "chess")
