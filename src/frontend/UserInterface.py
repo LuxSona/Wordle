@@ -1,10 +1,11 @@
 import tkinter as tk 
 from .WordleClient import WordleClient
+from collections.abc import Callable
 
 class UserInterface():
     """The user interface class
     """     
-    def __init__(self, client : WordleClient):
+    def __init__(self, on_guess : Callable[[str]], on_reset: Callable, on_quit: Callable):
         """The initialization function for the wordle interface class.
 
         :param client: A reference to the client connection handler
@@ -28,6 +29,13 @@ class UserInterface():
         self.word_frame.pack(fill="y",expand=True)
         self.button_panel.pack()
         self.root.mainloop()
+    
+    def show_dialog(self, text: str):
+        ...
+    
+    def color_row(self, colors : list[str]):
+        ...
+    
     
     def _initalizeRows(self):
         """Initializes the word grid rows for the interface.
@@ -76,7 +84,9 @@ class UserInterface():
             for id, tile in row:
                 tile.itemconfig(id, text="")
                 tile.configure(bg="lightgray")
-
+    
+    def show_win(self):
+        ...
 
 client = WordleClient()
 a = UserInterface(client)
