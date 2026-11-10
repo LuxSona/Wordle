@@ -74,6 +74,9 @@ def handleData(wordle_server: server.Server, data : str) -> str:
     """
     commands = data.split(',')
     match commands[0]:
+        case 'T':
+            word = wordle_server.word
+            return f"WORD;{word}\n"
         case 'G':
             if len(commands) < 2:
                 return "ERROR\n"

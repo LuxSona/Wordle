@@ -13,3 +13,6 @@ For example, if `secret = heron` and `guess = hello`, then the colors that would
 If a word contains two of the same letter, we check for each individual letter. For example, if `secret=chess` and `guess=scars`, then the letters would be marked as `YYRRG`, because the final 's' is in the correct place, but the initial 's' is not.
 
 Finally, if a guess contains two of the same letter, and that matches only with one on our secret word, the second of the two letters gets marked as gray. For example, `secret=caves` and `guess=chess`, the result would be `YRYRY`.
+
+# Implementation
+This project aims to implement Wordle using a client-server style architecture. The logical implementation will be handled by a server on the backend and any/all front-end logic will be handled by the client. These two entities communicate using a specific schema (see )

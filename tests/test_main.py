@@ -60,41 +60,55 @@ def test_server(run_server_in_separate_process):
         resp =utils.recv_message(f)
         assert resp == "ERROR"
         print("Fourth test")
+
         #Check reset
         s.sendall("R\n".encode())
         resp =utils.recv_message(f)
         assert resp == "RESET"
         print("Fifth test")
+
         #Check set empty
         s.sendall("S\n".encode())
         resp =utils.recv_message(f)
         assert resp == "ERROR"
         print("Sixth test")
+
         #Check set with bad values
         s.sendall("S,HELLOO\n".encode())
         resp =utils.recv_message(f)
         assert resp == "ERROR"
         print("Seventh test")
+
         s.sendall("S,H1LLO\n".encode())
         resp =utils.recv_message(f)
         assert resp == "ERROR"
         print("Eight test")
+
         #Check set works with good values
         s.sendall("S,HELLO\n".encode())
-        resp =utils.recv_message(f)
+        resp = utils.recv_message(f)
         assert resp == "SET;hello"
         print("Ninth test")
+
+        s.sendall("T\n".encode())
+        resp = utils.recv_message(f)
+        assert resp == "WORD;hello"
+        print("Tenth test")
+
         #Check guess works with good but inaccurate values
         s.sendall("G,HILLO\n".encode())
         resp =utils.recv_message(f)
         assert resp == "GUESS_AGAIN;G,R,G,G,G"
-        print("Tenth test")
+        print("Eleventh test")
+
         #Check guess works with good and accurate values
         s.sendall("G,HELLO\n".encode())
         resp =utils.recv_message(f)
         assert resp == "SUCCESS"
-        print("Eleventh test")
+        print("Twelvth test")
+
         #Check quit works
         s.sendall("Q\n".encode())
         resp =utils.recv_message(f)
         assert resp == "QUIT"
+        print("Thirteenth test")

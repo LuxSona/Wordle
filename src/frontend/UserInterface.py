@@ -16,16 +16,17 @@ class UserInterface():
         self.word_frame = tk.Frame(self.root, width=150, height=300)
         self.root.geometry("600x400")
         self.button_panel = tk.Frame(self.root, width=600,height=100)
-        #Rows
+        #Rows and words
         self.ROW_COUNT = 6
         self.word_rows : list[list[tuple[int | None, tk.Canvas | None]]] = [[(None, None) for _ in range(5)] for _ in range(6)]
         self.current_row = 0
         self.current_col = 0
-
+        self.current_row_word : list[str] = []
+    
         self._initalizeRows()
+        self._add_event_binding()
         self.word_frame.pack(fill="y",expand=True)
         self.button_panel.pack()
-        self._add_event_binding()
         self.root.mainloop()
     
     def _initalizeRows(self):
@@ -44,25 +45,38 @@ class UserInterface():
 
         if event.keysym == "BackSpace":
             if self.current_col > 0 and self.current_row < 6:
+                self.current_col -= 1
                 id, tile = self.word_rows[self.current_row][self.current_col]
-                self.current_col = max(self.current_col-1, 0)
                 tile.itemconfig(id, text = '')
+                self.current_row_word.pop()
             
         elif event.keysym == "Return":
             if self.current_col == 5 and self.current_row < 6:
                 #Set the row to the next one over. Set the col to 0
                 self.current_row += 1
                 self.current_col = 0
+                returned_word = "".join(self.current_row_word)
+                print(returned_word)
+                self.current_row_word = []
         else:
             if event.char.isalpha():
                 if self.current_col < 5 and self.current_row < 6:
                     id, tile = self.word_rows[self.current_row][self.current_col]
                     tile.itemconfig(id, text=event.char.upper())
-                    self.current_col += 1 
+                    self.current_col += 1
+                    self.current_row_word.append(event.char.lower())
     
     def _add_event_binding(self):
         self.root.bind("<Key>",self._onKeyEntered)
-                
+    
+    def reset(self):
+        self.current_col = 0
+        self.current_row = 0
+        for row in self.word_rows:
+            for id, tile in row:
+                tile.itemconfig(id, text="")
+                tile.configure(bg="lightgray")
+
 
 client = WordleClient()
 a = UserInterface(client)
