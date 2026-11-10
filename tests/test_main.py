@@ -35,19 +35,19 @@ def test_server(run_server_in_separate_process):
 
         s.sendall("G,H1LLO\n".encode())
         resp = utils.recv_message(f)
-        assert resp == "ERROR;GUESS 2"
+        assert resp == "ERROR;GUESS;2"
         print("First test")
 
         #Check length
         s.sendall("G,HELLOO\n".encode())
         resp = utils.recv_message(f)
-        assert resp == "ERROR;GUESS 1"
+        assert resp == "ERROR;GUESS;1"
         print("Second test")
 
         #Check empty
         s.sendall("G\n".encode())
         resp = utils.recv_message(f)
-        assert resp == "ERROR;COMMAND"
+        assert resp == "ERROR;GUESS;COMMAND"
         print("Third test")
 
         #Check out_of_guesses
@@ -58,7 +58,7 @@ def test_server(run_server_in_separate_process):
             time.sleep(0.5)
         s.sendall("G,ZZYZX\n".encode())
         resp =utils.recv_message(f)
-        assert resp == "ERROR;GUESS 3"
+        assert resp == "ERROR;GUESS;3"
         print("Fourth test")
 
         #Check reset
@@ -70,18 +70,18 @@ def test_server(run_server_in_separate_process):
         #Check set empty
         s.sendall("S\n".encode())
         resp =utils.recv_message(f)
-        assert resp == "ERROR;SET COMMAND"
+        assert resp == "ERROR;SET;COMMAND"
         print("Sixth test")
 
         #Check set with bad values
         s.sendall("S,HELLOO\n".encode())
         resp =utils.recv_message(f)
-        assert resp == "ERROR;SET 1"
+        assert resp == "ERROR;SET;1"
         print("Seventh test")
 
         s.sendall("S,H1LLO\n".encode())
         resp =utils.recv_message(f)
-        assert resp == "ERROR;SET 2"
+        assert resp == "ERROR;SET;2"
         print("Eight test")
 
         #Check set works with good values
