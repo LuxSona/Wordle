@@ -50,6 +50,7 @@ class Controller():
                 #Get the secret word again
                 resp = self.client.send("T")
                 self.word = resp.split(';')[1]
+                self.ui.word = self.word
 
             #These branches shouldn't be used at all
             case "SET":

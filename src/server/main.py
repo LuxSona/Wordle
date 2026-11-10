@@ -20,18 +20,20 @@ def main():
     port = 12255 
     with socket.socket() as s:
         #Set timeout to something else for testing.
-        s.settimeout(120)
-        logger.info("[INFO] SOCKET CREATED")        
+        s.settimeout(1)
+        logger.info("[INFO] SOCKET CREATED")
         s.bind(('127.0.0.1', port))
         #Listen
         s.listen(5)
         logger.info(f"[INFO] LISTENING ON PORT {port}")
         try:
             while True:
-                c, addr = s.accept()
+                try:
+                    c, addr = s.accept()
+                except TimeoutError:
+                    continue
                 logger.info(f"[INFO] GOT CONNECTION FROM {addr}")
                 with c, c.makefile("r", encoding='utf-8', newline='\n') as f:
-                    c.settimeout(60)
                     c.sendall("READY\n".encode())
                     try:
                         while True:
@@ -52,6 +54,9 @@ def main():
                         logger.info(f"[INFO] CLIENT {addr} TIMED OUT / DISCONNECTED")
         except TimeoutError:
             logger.info("[INFO] TIMEOUT")
+        except KeyboardInterrupt:
+            logger.info("[INFO] SERVER STOPPED BY USER")
+        
             
         
                 
