@@ -32,3 +32,6 @@ Type each row out, and you might see something like this:
 
 When you are done, you can hit the x button on your tk window and `ctrl+c` on your server CLI window.
 
+# Adding and Updating Wordlist
+By default, this repository contains a small wordlist, located in `src/server/resources`. 
+Add any five letter word you'd like to this wordlist. 

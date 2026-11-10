@@ -9,6 +9,9 @@ def getWords() -> list[str]:
     :rtype: list[str]
     """    
     resources = files("src.server.resources").joinpath("wordlist.txt").read_text(encoding='utf-8')
+    for word in resources.split("\n")[:-1]:
+        if len(word) != 5:
+            raise ValueError(f"Word {word} is not five letters long!!")
     return resources.split('\n')[:-1]
 
 
