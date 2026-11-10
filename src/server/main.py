@@ -1,4 +1,6 @@
-from . import utils, server
+from ..utils import utils
+
+from . import server
 import socket
 import logging 
 
@@ -79,10 +81,10 @@ def handleData(wordle_server: server.Server, data : str) -> str:
             return f"WORD;{word}\n"
         case 'G':
             if len(commands) < 2:
-                return "ERROR\n"
+                return "ERROR;GUESS;COMMAND\n"
             resp, code = wordle_server.guess(commands[1])
             if code == '1' or code == '2' or code == '3':
-                return "ERROR\n"
+                return f"ERROR;GUESS;{code}\n"
             if code == 'SUCCESS':
                 return f"{code}\n" 
             else:
@@ -95,13 +97,13 @@ def handleData(wordle_server: server.Server, data : str) -> str:
             return "QUIT\n"
         case 'S':
             if len(commands) < 2:
-                return "ERROR\n"
+                return "ERROR;SET;COMMAND\n"
             w,c = wordle_server.setWord(commands[1])
             if c == '1' or c == '2':
-                return "ERROR\n"
+                return f"ERROR;SET;{c}\n"
             return f"SET;{w}\n" 
         case _:
-            return "ERROR\n"
+            return "ERROR;UNK;UNK\n"
 
 
 

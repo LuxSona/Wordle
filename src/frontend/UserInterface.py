@@ -1,19 +1,26 @@
-import tkinter as tk 
+import tkinter as tk
+from tkinter import messagebox
 from .WordleClient import WordleClient
 from collections.abc import Callable
 
 class UserInterface():
     """The user interface class
     """     
-    def __init__(self, on_guess : Callable[[str]], on_reset: Callable, on_quit: Callable):
+    def __init__(self, on_guess : Callable[[str], None], on_reset: Callable, on_quit: Callable, root : tk.Tk, word : str):
         """The initialization function for the wordle interface class.
 
         :param client: A reference to the client connection handler
         :type client: WordleClient
         """        
         #Root pane
+        #Callables 
+        self.on_guess = on_guess
+        self.on_reset = on_reset
+        self.on_quit = on_quit
+
+        self.word = word 
         self.client = client
-        self.root = tk.Tk()
+        self.root = root
         self.word_frame = tk.Frame(self.root, width=150, height=300)
         self.root.geometry("600x400")
         self.button_panel = tk.Frame(self.root, width=600,height=100)
@@ -28,15 +35,28 @@ class UserInterface():
         self._add_event_binding()
         self.word_frame.pack(fill="y",expand=True)
         self.button_panel.pack()
-        self.root.mainloop()
     
-    def show_dialog(self, text: str):
-        ...
+    def show_win(self):
+        response = messagebox.askyesno("Win!",f"You won in {self.current_row+1} guesses! Would you like to play again?")
+        if response:
+            self.on_reset()
+        else:
+            self.on_quit()
+    
+    def show_lose(self):
+        response = messagebox.askyesno("Lose", f"Sorry! The word was {self.word}. Would you like to play again?")
+        if response:
+            self.on_reset()
+        else:
+            self.on_quit()
     
     def color_row(self, colors : list[str]):
-        ...
-    
-    
+        letter_to_color = {'G': "chartreuse", 'Y': "goldenrod1", 'R': "gray57"}
+        for col, color in enumerate(colors):
+            _, tile = self.word_rows[self.current_row][col]
+            tile.configure(bg=letter_to_color[color])
+        
+
     def _initalizeRows(self):
         """Initializes the word grid rows for the interface.
         """
@@ -46,7 +66,17 @@ class UserInterface():
                 tile.grid(row=row, column=col, padx=5, pady=7, sticky='')
                 text_id = tile.create_text(25,25,text='')
                 self.word_rows[row][col] = (text_id,tile)
-
+    
+    def accepted(self, colors : list[str]):
+        #Accepted a guess.
+        self.color_row(colors)
+        if self.current_row < 6:
+            self.current_col = 0
+            self.current_row += 1
+            self.current_row_word = []
+        if self.current_row == 6:
+            self.show_lose()
+        
     def _onKeyEntered(self, event):
         print(self.current_row, self.current_col)
         #Get current cell
@@ -61,11 +91,8 @@ class UserInterface():
         elif event.keysym == "Return":
             if self.current_col == 5 and self.current_row < 6:
                 #Set the row to the next one over. Set the col to 0
-                self.current_row += 1
-                self.current_col = 0
                 returned_word = "".join(self.current_row_word)
-                print(returned_word)
-                self.current_row_word = []
+                self.on_guess(returned_word)
         else:
             if event.char.isalpha():
                 if self.current_col < 5 and self.current_row < 6:
@@ -85,8 +112,13 @@ class UserInterface():
                 tile.itemconfig(id, text="")
                 tile.configure(bg="lightgray")
     
-    def show_win(self):
-        ...
+    
+    def show_error(self, error_type : str, error_code : str):
+        resp = messagebox.askyesno("ERROR",f"You made an error during {error_type}, code {error_code}. Do you wish to reset? No will quit.")
+        if resp:
+            self.on_reset()
+        else:
+            self.on_quit()
 
 client = WordleClient()
-a = UserInterface(client)
+a = UserInterface(lambda e: None, lambda e: None, lambda e: None, tk.Tk(), "chess")

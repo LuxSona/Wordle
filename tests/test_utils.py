@@ -1,4 +1,4 @@
-from src.server.utils import getFrequencies
+from src.utils.utils import getFrequencies
 import pytest 
 
 def test_frequencies():

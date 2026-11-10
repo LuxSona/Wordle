@@ -1,4 +1,4 @@
-from . import utils
+from ..utils import utils
 import random 
 
 class Server():

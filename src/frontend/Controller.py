@@ -1,37 +1,86 @@
 from .UserInterface import UserInterface
 from .WordleClient import WordleClient
+import tkinter as tk
+import threading 
+import queue 
 
 class Controller():
-    def __init__(self):
+    def __init__(self, root: tk.Tk):
+        self.root = root
         self.client = WordleClient()
-        self.ui = UserInterface(self._handleGuess, self._reset, self._quit)
-        self.secret_word = self.client.request_word()
+        self.secret_word = self.client.send("T\n").split(';')[1]
+        self.ui = UserInterface(self._enqueueGuess, self._reset, self._on_quit, self.root, self.secret_word)
+        self.inbox = queue.Queue() 
+        self.outbox = queue.Queue()
+        self.io_thread = threading.Thread(target=self._worker_thread, daemon=True)
+        self.io_thread.start()
+        self.poll_queue()
     
 
-    def _quit(self):
-        self.client.quit()
+    def _on_quit(self):
+        self.outbox.put("Q")
+
+    def quit(self):
+        self.root.quit()
+
+    def handle_message(self, message : str):
+        #We have a million kinds of messages that we can recieve, but let's start with the most basic
+        if message is None:
+            self.root.quit()
+        message_parts = message.split(';')
+        command = message_parts[0]
+        match command:
+            case "GUESS_AGAIN":
+                colors = message_parts[1].split(',')
+                self.ui.accepted(colors)
+            case "SUCCESS":
+                self.ui.show_win()
+            case "QUIT":
+                self.quit()
+            case "ERROR":
+                error_type = message_parts[1]
+                error_code = message_parts[2]
+                self.ui.show_error(error_type, error_code)
+            case "RESET":
+                self.ui.reset()
+            #These branches shouldn't be used at all
+            case "SET":
+                pass
+                #These won't be used at all.
+            case "WORD":
+                pass
+            case _:
+                pass 
+
         
-    def _handleGuess(self, word : str):
+    def poll_queue(self):
+        try:
+            while True:
+                in_message = self.inbox.get_nowait()
+                self.handle_message(in_message)
+        except queue.Empty:
+            pass
+    
+        self.root.after(100, self.poll_queue)
+    
+    def _worker_thread(self):
+        while True:
+            try:
+                sendoff = self.outbox.get()
+                resp = self.client.send(sendoff)
+                self.inbox.put(resp)
+            except queue.Empty:
+                pass 
+
+    def _enqueueGuess(self, word : str):
         """Handles the guess on the part of the wordle client
 
         :param word: The word to send
         :type word: string
-        """        
-        response = self.client.guess(word)
-        parts = response.split(';')
-        if parts[0] == "SUCCESS":
-            self.ui.show_win()
-        
-        elif len(parts) == 1:
-            self.ui.show_dialog("Invalid Word!")
-        else:
-            colors = response[1].split(',')
-            self.ui.color_row(colors)
+        """
+        self.outbox.put(f"G,{word}\n")
+    
     
     def _reset(self):
-        self.ui.reset()
-        self.client.reset()
-        self.reset()
+        self.outbox.put("R")
     
-    def reset(self):
-        self.secret_word = self.client.request_word()
