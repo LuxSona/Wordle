@@ -36,6 +36,7 @@ class UserInterface():
         self.button_panel.pack()
     
     def show_win(self):
+        self.color_row(['G','G','G','G','G'])
         response = messagebox.askyesno("Win!",f"You won in {self.current_row+1} guesses! Would you like to play again?")
         if response:
             self.reset()
