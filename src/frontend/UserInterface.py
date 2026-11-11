@@ -21,7 +21,7 @@ class UserInterface():
         self.COLOR_DICTIONARY = {'G': "chartreuse", 'Y': "goldenrod1", 'R': "gray57"}
         #Heading table. 
         self.heading_table = tk.Frame(self.root, width=150,height=100)
-        self.title = tk.Label(self.heading_table, text="WORDLE v. 0.1.0", font=("Franklin Gothic", 24, "bold"))
+        self.title = tk.Label(self.heading_table, text="WORDLE v. 0.1.1", font=("Franklin Gothic", 24, "bold"))
         self.title.pack()
         #Set up letters available
         self.letters_available = tk.Frame(self.root, width=150,height=300)

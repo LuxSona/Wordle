@@ -1,4 +1,4 @@
-# Wordle v 0.1.0
+# Wordle v 0.1.1
 ----
 
 # Description
@@ -35,3 +35,10 @@ When you are done, you can hit the x button on your tk window and `ctrl+c` on yo
 # Adding and Updating Wordlist
 By default, this repository contains a small wordlist, located in `src/server/resources`. 
 Add any five letter word you'd like to this wordlist. 
+
+# Acknowledgements
+Authors: Ira Khan
+The original Wordle is owned by the New York Times
+
+## AI Disclosure
+99% of this code was written by a human. Three lines of code were written entirely by Claude Opus (Lines 31-34 in src.server.server) which were the result of debugging a hanging server issue. The same model was used to refactor code (update method names, package names, etc) and for advice. 
